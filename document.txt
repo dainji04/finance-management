@@ -1,0 +1,47 @@
+Framework: NextJS (cả Front-end và Back-end)
+Database: MongoDB
+Thư viện UI: Ant Design
+
+Tổng quan dự án:
+Dự án quán lý chi tiêu cá nhân, bao gồm các màn hình chính sau
+
+1. Màn hình ghi chi tiêu theo ngày:
++ cho phép xem, tạo, sửa, xóa
++ default sẽ là ngày hiện tại (có thể cho chọn ghi ngày tỏng quá khứ, không cho chọn ngày tương lai)
++ Cho chọn mục đã chi tiêu (sẽ lấy danh sách các category này trong page tạo category). Mỗi khi chọn 1 category sẽ cho nhập giá tiền và ghi chú cho mục chi tiêu đó.
++ có thể tạo category nếu danh sách chưa có
++ có danh sách hiển thị chi tiêu vừa mới ghi ngay ở bên dưới
+
+2. Màn hình tạo category
++ cho phép xem, tạo, sửa, xóa
++ cho phép người dùng tạo category: Tên category, màu sắc hiển thị label
++ cho phép nhập budget cho từng loại category này
+
+3. Màn hình lịch sử chi tiêu:
++ cho phép xem, tạo, sửa, xóa
++ show danh sách các mục chi tiêu đã ghi ở màn hình (1). Chọn filter theo ngày, theo category
++ trên header sẽ tính total tổng tiền đã chi theo các record sau khi filter
+
+4. Màn hình quản lý tiên vào
++ cho phép xem, tạo, sửa, xóa record tiền vào
++ cho phép nhập số tiền
++ nếu là tiền vào thì sẽ có các mục (Tiền Lương, Tiền dự án ngoài, Tiền trả nợ, tiền lãi đầu tư, vay tiền).
++ với mục tiền trả nợ sẽ có phần chọn người nào đang trả nợ (danh sách người nợ sẽ ở màn hình khác).
++ với các mục sẽ có phần ghi chú khi tạo
+
+5. Màn hình công nợ
++ cho phéo xem, tạo, sửa, xóa record công nợ
++ có chọn người nợ, số tiền, lưu lại danh sách ngay bên dưới
++ khi tạo cho chọn vay hoặc trả. Nếu trả thì sẽ cho chọn trong danh sách người đang có trong danh sách nợ để trừ, vay thì tạo mới record
+
+6. Màn hình tổng hợp:
++ thống kê tổng số tiền đã tiêu theo các đầu mục
++ khi click vào từng record sẽ hiển thị ghi chú theo ngày
++ filter theo tháng, theo category
++ so sánh chi tiêu tháng hiện tại với tháng trước đó, hoặc tháng đc chọn
++ hiển thị theo budget, xem mục nào đã tiêu lố và mục nào còn thừa
++ hiển thị tiền vào tiền ra, so sánh với tháng trước
++ thống kê công nợ của những người đang nợ
+
+7. Màn hình đăng nhập, tạo user: với email, sđt, tên hiển thị, tên thật
+

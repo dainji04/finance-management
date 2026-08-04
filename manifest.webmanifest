@@ -1,0 +1,16 @@
+{
+  "name": "Quản lý chi tiêu cá nhân",
+  "short_name": "Chi tiêu",
+  "description": "Theo dõi chi tiêu, thu nhập và công nợ trên điện thoại",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#1677ff",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

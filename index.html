@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1677ff" />
+    <title>Quản lý chi tiêu cá nhân</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Ứng dụng cá nhân</p>
+          <h1>Quản lý chi tiêu</h1>
+          <p class="subtitle">Theo dõi thu, chi, công nợ và ngân sách ngay trên điện thoại.</p>
+        </div>
+        <button id="installBtn" class="ghost-btn">Cài đặt</button>
+      </header>
+
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-target="overview">Tổng quan</button>
+        <button class="tab" data-target="expense">Chi tiêu</button>
+        <button class="tab" data-target="category">Danh mục</button>
+        <button class="tab" data-target="income">Thu nhập</button>
+        <button class="tab" data-target="debt">Công nợ</button>
+        <button class="tab" data-target="profile">Hồ sơ</button>
+      </nav>
+
+      <main>
+        <section id="overview" class="panel active">
+          <div class="stats-grid">
+            <article class="card stat-card highlight">
+              <p>Chi tháng này</p>
+              <h2 id="expenseTotal">0đ</h2>
+            </article>
+            <article class="card stat-card">
+              <p>Thu tháng này</p>
+              <h2 id="incomeTotal">0đ</h2>
+            </article>
+            <article class="card stat-card">
+              <p>Số dư</p>
+              <h2 id="balanceTotal">0đ</h2>
+            </article>
+          </div>
+
+          <div class="card">
+            <div class="section-head">
+              <h3>Ngân sách theo danh mục</h3>
+              <label>Tháng
+                <input type="month" id="monthPicker" />
+              </label>
+            </div>
+            <div id="budgetList"></div>
+          </div>
+        </section>
+
+        <section id="expense" class="panel">
+          <div class="card">
+            <h3>Ghi chi tiêu mới</h3>
+            <form id="expenseForm" class="form-grid">
+              <label>Ngày
+                <input type="date" id="expenseDate" required />
+              </label>
+              <label>Danh mục
+                <select id="expenseCategory" required></select>
+              </label>
+              <label>Số tiền
+                <input type="number" id="expenseAmount" min="1000" required />
+              </label>
+              <label class="full">Ghi chú
+                <textarea id="expenseNote" rows="3"></textarea>
+              </label>
+              <button class="primary-btn full" type="submit">Lưu chi tiêu</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Danh sách chi tiêu gần đây</h3>
+            <div id="expenseList"></div>
+          </div>
+        </section>
+
+        <section id="category" class="panel">
+          <div class="card">
+            <h3>Thêm danh mục</h3>
+            <form id="categoryForm" class="form-grid">
+              <label class="full">Tên danh mục
+                <input type="text" id="categoryName" required />
+              </label>
+              <label>Màu hiển thị
+                <input type="color" id="categoryColor" value="#1677ff" />
+              </label>
+              <label>Ngân sách
+                <input type="number" id="categoryBudget" min="0" />
+              </label>
+              <button class="primary-btn full" type="submit">Thêm</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Danh mục hiện có</h3>
+            <div id="categoryList"></div>
+          </div>
+        </section>
+
+        <section id="income" class="panel">
+          <div class="card">
+            <h3>Nhập tiền vào</h3>
+            <form id="incomeForm" class="form-grid">
+              <label>Loại thu nhập
+                <select id="incomeType">
+                  <option>Tiền lương</option>
+                  <option>Tiền dự án ngoài</option>
+                  <option>Tiền trả nợ</option>
+                  <option>Tiền lãi đầu tư</option>
+                  <option>Vay tiền</option>
+                </select>
+              </label>
+              <label>Số tiền
+                <input type="number" id="incomeAmount" min="1000" required />
+              </label>
+              <label>Ngày
+                <input type="date" id="incomeDate" required />
+              </label>
+              <label class="full">Ghi chú
+                <textarea id="incomeNote" rows="3"></textarea>
+              </label>
+              <button class="primary-btn full" type="submit">Lưu tiền vào</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Lịch sử thu nhập</h3>
+            <div id="incomeList"></div>
+          </div>
+        </section>
+
+        <section id="debt" class="panel">
+          <div class="card">
+            <h3>Ghi công nợ</h3>
+            <form id="debtForm" class="form-grid">
+              <label>Loại
+                <select id="debtType">
+                  <option value="borrow">Vay</option>
+                  <option value="repay">Trả</option>
+                </select>
+              </label>
+              <label>Người liên quan
+                <input type="text" id="debtPerson" required />
+              </label>
+              <label>Số tiền
+                <input type="number" id="debtAmount" min="1000" required />
+              </label>
+              <label class="full">Ghi chú
+                <textarea id="debtNote" rows="3"></textarea>
+              </label>
+              <button class="primary-btn full" type="submit">Lưu</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Danh sách công nợ</h3>
+            <div id="debtList"></div>
+          </div>
+        </section>
+
+        <section id="profile" class="panel">
+          <div class="card">
+            <h3>Thông tin người dùng</h3>
+            <form id="profileForm" class="form-grid">
+              <label class="full">Tên hiển thị
+                <input type="text" id="profileDisplayName" required />
+              </label>
+              <label class="full">Tên thật
+                <input type="text" id="profileName" />
+              </label>
+              <label class="full">Email
+                <input type="email" id="profileEmail" />
+              </label>
+              <label class="full">Số điện thoại
+                <input type="tel" id="profilePhone" />
+              </label>
+              <button class="primary-btn full" type="submit">Lưu hồ sơ</button>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
