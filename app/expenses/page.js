@@ -29,7 +29,7 @@ export default function ExpensesPage() {
       if (filterCategoryId && item.categoryId !== filterCategoryId) return false;
       if (monthStr && !item.date.startsWith(monthStr)) return false;
       return true;
-    });
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [data.expenses, filterCategoryId, filterMonth]);
 
   const openCreateModal = () => {
