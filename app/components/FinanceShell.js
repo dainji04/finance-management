@@ -5,8 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Layout, Menu } from 'antd';
 import { FiDollarSign, FiGrid, FiTrendingUp, FiBriefcase, FiActivity, FiBarChart2, FiUser } from 'react-icons/fi';
+import { useFinance } from './FinanceProvider';
 
 const { Header, Content } = Layout;
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
+}
 
 const links = [
   { href: '/', label: 'Tổng hợp', icon: <FiBarChart2 /> },
@@ -22,6 +27,21 @@ export function FinanceShell({ children }) {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
   const currentLink = links.find((link) => link.href === pathname);
+  const { data } = useFinance();
+
+  // Money lent out (positive debt entries) leaves the wallet immediately, even
+  // though it isn't recorded as an Expense. Repayments already flow back in as
+  // an Income record, so only the gross amount ever lent (not the net
+  // outstanding debt) should be subtracted here — otherwise a repayment would
+  // be counted twice (once as income, once as debt shrinking).
+  const totalLentOut = data.debts
+    .filter((item) => item.amount > 0)
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const currentBalance = data.incomes.reduce((sum, item) => sum + item.amount, 0)
+    - data.expenses.reduce((sum, item) => sum + item.amount, 0)
+    - totalLentOut
+    + Number(data.profile.balance || 0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -43,6 +63,14 @@ export function FinanceShell({ children }) {
             {currentLink?.icon}
             <span>{currentLink?.label ?? 'Quản lý chi tiêu'}</span>
           </div>
+          {pathname === '/' && (
+            <div className="header-balance">
+              <span className="header-balance-label">Số dư</span>
+              <span className="header-balance-value" style={{ color: currentBalance < 0 ? '#cf1322' : '#2563eb' }}>
+                {formatCurrency(currentBalance)}
+              </span>
+            </div>
+          )}
         </div>
       </Header>
       <Content style={{ padding: isMobile ? '16px 16px 84px' : '16px' }}>

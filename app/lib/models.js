@@ -19,7 +19,9 @@ const IncomeSchema = new Schema({
   type: { type: String, required: true },
   amount: { type: Number, required: true },
   date: { type: String, required: true },
-  note: { type: String, default: '' }
+  note: { type: String, default: '' },
+  person: { type: String, default: '' },
+  relatedDebtId: { type: Schema.Types.ObjectId, ref: 'Debt', default: null }
 }, { timestamps: true });
 
 const DebtSchema = new Schema({
@@ -34,7 +36,8 @@ const ProfileSchema = new Schema({
   displayName: { type: String, default: 'Bạn' },
   name: { type: String, default: '' },
   email: { type: String, default: '' },
-  phone: { type: String, default: '' }
+  phone: { type: String, default: '' },
+  balance: { type: Number, default: 0 }
 }, { timestamps: true });
 
 const ActivitySchema = new Schema({

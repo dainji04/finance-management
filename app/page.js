@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Card, Row, Col, Statistic, Progress, Typography, Space, Tag, Spin, Alert } from 'antd';
-import { FiBarChart2 } from 'react-icons/fi';
+import { Card, Row, Col, Statistic, Progress, Typography, Space, Tag, Tabs, Spin, Alert } from 'antd';
 import { useFinance } from './components/FinanceProvider';
 
 const { Text } = Typography;
@@ -15,23 +14,32 @@ function monthKey(date) {
   return new Date(date).toISOString().slice(0, 7);
 }
 
+function groupSum(items, key) {
+  const map = new Map();
+  items.forEach((item) => {
+    const label = item[key] || 'Khác';
+    map.set(label, (map.get(label) || 0) + item.amount);
+  });
+  return Array.from(map.entries())
+    .map(([label, amount]) => ({ label, amount }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
 export default function SummaryPage() {
   const { data, loading, error } = useFinance();
   const selectedMonth = monthKey(new Date());
-  const previousMonth = useMemo(() => {
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const date = new Date(year, month - 1, 1);
-    date.setMonth(date.getMonth() - 1);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  }, [selectedMonth]);
 
   const expenses = data.expenses.filter((item) => monthKey(item.date) === selectedMonth);
   const incomes = data.incomes.filter((item) => monthKey(item.date) === selectedMonth);
-  const previousExpenses = data.expenses.filter((item) => monthKey(item.date) === previousMonth);
+  const debtsThisMonth = data.debts.filter((item) => monthKey(item.date) === selectedMonth);
 
   const totalExpense = expenses.reduce((sum, item) => sum + item.amount, 0);
   const totalIncome = incomes.reduce((sum, item) => sum + item.amount, 0);
-  const prevExpense = previousExpenses.reduce((sum, item) => sum + item.amount, 0);
+  const totalDebt = debtsThisMonth.reduce((sum, item) => sum + item.amount, 0);
+  const expenseVsIncome = totalIncome - totalExpense;
+
+  const incomeByType = useMemo(() => groupSum(incomes, 'type'), [incomes]);
+  const debtByPerson = useMemo(() => groupSum(debtsThisMonth, 'person'), [debtsThisMonth]);
 
   if (loading) {
     return (
@@ -53,15 +61,11 @@ export default function SummaryPage() {
     );
   }
 
-  return (
-    <section className="stack">
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={8}><Card><Statistic title="Chi tháng này" value={totalExpense} formatter={(value) => formatCurrency(Number(value))} /></Card></Col>
-        <Col xs={24} md={8}><Card><Statistic title="Thu tháng này" value={totalIncome} formatter={(value) => formatCurrency(Number(value))} /></Card></Col>
-        <Col xs={24} md={8}><Card><Statistic title="So sánh tháng trước" value={totalExpense - prevExpense} formatter={(value) => formatCurrency(Number(value))} /></Card></Col>
-      </Row>
-
-      <Card title={<Space><FiBarChart2 /><span>Ngân sách theo danh mục</span></Space>}>
+  const tabItems = [
+    {
+      key: 'budget',
+      label: 'Ngân sách',
+      children: (
         <Space direction="vertical" style={{ width: '100%' }}>
           {data.categories.map((category) => {
             const amount = expenses.filter((item) => item.categoryId === category.id).reduce((sum, item) => sum + item.amount, 0);
@@ -77,6 +81,65 @@ export default function SummaryPage() {
             );
           })}
         </Space>
+      )
+    },
+    {
+      key: 'income',
+      label: 'Thu nhập',
+      children: (
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {incomeByType.length === 0 ? (
+            <Text type="secondary">Chưa có khoản thu nào tháng này</Text>
+          ) : (
+            incomeByType.map((entry) => (
+              <div className="row" key={entry.label}>
+                <Text strong>{entry.label}</Text>
+                <Text type="secondary">{formatCurrency(entry.amount)}</Text>
+              </div>
+            ))
+          )}
+        </Space>
+      )
+    },
+    {
+      key: 'debt',
+      label: 'Công nợ',
+      children: (
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {debtByPerson.length === 0 ? (
+            <Text type="secondary">Chưa có công nợ nào tháng này</Text>
+          ) : (
+            debtByPerson.map((entry) => (
+              <div className="row" key={entry.label}>
+                <Text strong>{entry.label}</Text>
+                <Text type="secondary">{formatCurrency(entry.amount)}</Text>
+              </div>
+            ))
+          )}
+        </Space>
+      )
+    }
+  ];
+
+  return (
+    <section className="stack">
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Chi tháng này" value={totalExpense} formatter={(value) => formatCurrency(Number(value))} />
+            <Text type={expenseVsIncome < 0 ? 'danger' : 'success'} style={{ display: 'block', marginTop: 8 }}>
+              {expenseVsIncome < 0
+                ? `Âm ${formatCurrency(Math.abs(expenseVsIncome))} so với thu nhập tháng này`
+                : `Dư ${formatCurrency(expenseVsIncome)} so với thu nhập tháng này`}
+            </Text>
+          </Card>
+        </Col>
+        <Col xs={24} md={8}><Card><Statistic title="Thu tháng này" value={totalIncome} formatter={(value) => formatCurrency(Number(value))} /></Card></Col>
+        <Col xs={24} md={8}><Card><Statistic title="Công nợ tháng này" value={totalDebt} formatter={(value) => formatCurrency(Number(value))} /></Card></Col>
+      </Row>
+
+      <Card>
+        <Tabs items={tabItems} centered />
       </Card>
     </section>
   );

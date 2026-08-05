@@ -42,11 +42,13 @@ export default function ActivitiesPage() {
 
   const filteredActivities = useMemo(() => {
     const monthStr = filterMonth ? filterMonth.format('YYYY-MM') : null;
-    return data.activities.filter((item) => {
-      if (filterType && item.type !== filterType) return false;
-      if (monthStr && !item.date.startsWith(monthStr)) return false;
-      return true;
-    });
+    return data.activities
+      .filter((item) => {
+        if (filterType && item.type !== filterType) return false;
+        if (monthStr && !item.date.startsWith(monthStr)) return false;
+        return true;
+      })
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }, [data.activities, filterType, filterMonth]);
 
   const openCreateModal = () => {

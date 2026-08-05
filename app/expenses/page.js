@@ -25,11 +25,13 @@ export default function ExpensesPage() {
 
   const filteredExpenses = useMemo(() => {
     const monthStr = filterMonth ? filterMonth.format('YYYY-MM') : null;
-    return data.expenses.filter((item) => {
-      if (filterCategoryId && item.categoryId !== filterCategoryId) return false;
-      if (monthStr && !item.date.startsWith(monthStr)) return false;
-      return true;
-    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+    return data.expenses
+      .filter((item) => {
+        if (filterCategoryId && item.categoryId !== filterCategoryId) return false;
+        if (monthStr && !item.date.startsWith(monthStr)) return false;
+        return true;
+      })
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }, [data.expenses, filterCategoryId, filterMonth]);
 
   const openCreateModal = () => {

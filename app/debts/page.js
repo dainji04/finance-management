@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Form, Input, Select, Button, List, Typography, Tag, message, Spin, Alert, Modal, Dropdown } from 'antd';
+import { useMemo, useState } from 'react';
+import { Card, Form, Input, AutoComplete, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown } from 'antd';
 import { FiBriefcase, FiEdit2, FiMoreVertical, FiPlus, FiTrash2 } from 'react-icons/fi';
+import dayjs from 'dayjs';
 import { useFinance } from '../components/FinanceProvider';
 
 const { Text } = Typography;
-const { Option } = Select;
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
@@ -20,6 +20,15 @@ export default function DebtsPage() {
   const [editingId, setEditingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  const sortedDebts = useMemo(() => {
+    return [...data.debts].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  }, [data.debts]);
+
+  const personOptions = useMemo(() => {
+    const names = Array.from(new Set(data.debts.map((item) => item.person).filter(Boolean)));
+    return names.map((name) => ({ value: name }));
+  }, [data.debts]);
+
   const openCreateModal = () => {
     setEditingId(null);
     form.resetFields();
@@ -28,7 +37,12 @@ export default function DebtsPage() {
 
   const openEditModal = (item) => {
     setEditingId(item.id);
-    form.setFieldsValue({ type: item.type, person: item.person, amount: item.amount, note: item.note });
+    form.setFieldsValue({
+      person: item.person,
+      amount: item.amount,
+      note: item.note,
+      date: item.date ? dayjs(item.date) : dayjs()
+    });
     setModalOpen(true);
   };
 
@@ -40,11 +54,11 @@ export default function DebtsPage() {
   const submit = async (values) => {
     setSubmitting(true);
     const payload = {
-      type: values.type,
+      type: 'borrow',
       person: values.person,
       amount: Number(values.amount || 0),
       note: values.note,
-      date: new Date().toISOString().slice(0, 10)
+      date: values.date ? values.date.format('YYYY-MM-DD') : new Date().toISOString().slice(0, 10)
     };
     try {
       if (editingId) {
@@ -122,17 +136,20 @@ export default function DebtsPage() {
       >
         <div className="scroll-list">
         <List
-          dataSource={data.debts}
+          dataSource={sortedDebts}
           renderItem={(item) => (
             <List.Item>
               <div className="record-item">
                 <div className="record-item-body">
                   <div className="record-item-header">
-                    <span className="record-item-title">
-                      <Tag color={item.type === 'borrow' ? 'volcano' : 'green'}>{item.type === 'borrow' ? 'Vay' : 'Trả'}</Tag>
-                      <Text strong>{item.person}</Text>
-                    </span>
-                    <Text strong className="record-item-amount">{formatCurrency(item.amount)}</Text>
+                    <Text strong className="record-item-title">{item.person}</Text>
+                    <Text
+                      strong
+                      className="record-item-amount"
+                      style={{ color: item.amount < 0 ? '#16a34a' : undefined }}
+                    >
+                      {formatCurrency(item.amount)}
+                    </Text>
                   </div>
                   <div className="record-item-footer">
                     <span className="muted record-item-note">{item.note || 'Không có ghi chú'}</span>
@@ -158,11 +175,17 @@ export default function DebtsPage() {
 
       <Modal title={editingId ? 'Sửa công nợ' : 'Ghi công nợ'} open={modalOpen} onCancel={closeModal} footer={null} destroyOnClose>
         <Form form={form} layout="vertical" onFinish={submit} onFinishFailed={onFinishFailed}>
-          <Form.Item name="type" label="Loại" rules={[{ required: true, message: 'Vui lòng chọn loại' }]}>
-            <Select><Option value="borrow">Vay</Option><Option value="repay">Trả</Option></Select>
+          <Form.Item name="person" label="Người vay" rules={[{ required: true, message: 'Vui lòng nhập người vay' }]}>
+            <AutoComplete
+              options={personOptions}
+              filterOption={(inputValue, option) => option.value.toLowerCase().includes(inputValue.toLowerCase())}
+              placeholder="Chọn hoặc nhập tên người vay"
+            />
           </Form.Item>
-          <Form.Item name="person" label="Người liên quan" rules={[{ required: true, message: 'Vui lòng nhập người liên quan' }]}><Input /></Form.Item>
           <Form.Item name="amount" label="Số tiền" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}><Input type="number" min="1000" /></Form.Item>
+          <Form.Item name="date" label="Ngày" rules={[{ required: true, message: 'Vui lòng chọn ngày' }]} initialValue={dayjs()}>
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
           <Form.Item name="note" label="Ghi chú"><Input.TextArea rows={3} /></Form.Item>
           <Button type="primary" icon={<FiBriefcase />} htmlType="submit" loading={submitting} block>
             {editingId ? 'Cập nhật' : 'Lưu công nợ'}

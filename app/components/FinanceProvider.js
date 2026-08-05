@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const FinanceContext = createContext(null);
 
-const defaultProfile = { displayName: 'Bạn', name: '', email: '', phone: '' };
+const defaultProfile = { displayName: 'Bạn', name: '', email: '', phone: '', balance: 0 };
 
 function normalizeRecord(record) {
   if (!record) return record;
@@ -35,7 +35,7 @@ export function FinanceProvider({ children }) {
           incomes: normalizeList(body.incomes),
           debts: normalizeList(body.debts),
           activities: normalizeList(body.activities),
-          profile: body.profile || defaultProfile
+          profile: body.profile ? { ...defaultProfile, ...body.profile } : defaultProfile
         });
       } catch (error) {
         console.error('Lỗi tải dữ liệu:', error);

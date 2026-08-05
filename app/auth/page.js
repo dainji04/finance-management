@@ -18,7 +18,7 @@ export default function AuthPage() {
   const submit = async (event) => {
     event.preventDefault();
     try {
-      await updateProfile(form);
+      await updateProfile({ ...form, balance: Number(form.balance || 0) });
       message.success('Đã lưu hồ sơ');
     } catch (err) {
       message.error('Không lưu được hồ sơ');
@@ -65,6 +65,14 @@ export default function AuthPage() {
           <div className="field full">
             <label>Số điện thoại</label>
             <Input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+          </div>
+          <div className="field full">
+            <label>Số dư ban đầu</label>
+            <Input
+              type="number"
+              value={form.balance ?? 0}
+              onChange={(event) => setForm({ ...form, balance: event.target.value })}
+            />
           </div>
           <Button type="primary" icon={<FiUser />} htmlType="submit">Lưu hồ sơ</Button>
         </form>
