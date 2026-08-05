@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Card, Form, Input, Select, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown } from 'antd';
+import { Card, Form, Input, Select, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown, InputNumber } from 'antd';
 import { FiEdit2, FiMoreVertical, FiPlus, FiTrash2, FiTrendingUp } from 'react-icons/fi';
 import dayjs from 'dayjs';
 import { useFinance } from '../components/FinanceProvider';
@@ -177,37 +177,37 @@ export default function IncomePage() {
         extra={<Button type="primary" icon={<FiPlus />} onClick={openCreateModal}>Thêm mới</Button>}
       >
         <div className="scroll-list">
-        <List
-          dataSource={sortedIncomes}
-          renderItem={(item) => (
-            <List.Item>
-              <div className="record-item">
-                <div className="record-item-body">
-                  <div className="record-item-header">
-                    <Text strong className="record-item-title">
-                      {item.type}{item.person ? ` · ${item.person}` : ''}
-                    </Text>
-                    <Text strong className="record-item-amount">{formatCurrency(item.amount)}</Text>
+          <List
+            dataSource={sortedIncomes}
+            renderItem={(item) => (
+              <List.Item>
+                <div className="record-item">
+                  <div className="record-item-body">
+                    <div className="record-item-header">
+                      <Text strong className="record-item-title">
+                        {item.type}{item.person ? ` · ${item.person}` : ''}
+                      </Text>
+                      <Text strong className="record-item-amount">{formatCurrency(item.amount)}</Text>
+                    </div>
+                    <div className="record-item-footer">
+                      <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
+                      <span className="record-item-date">{item.date}</span>
+                    </div>
                   </div>
-                  <div className="record-item-footer">
-                    <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
-                    <span className="record-item-date">{item.date}</span>
-                  </div>
+                  <Dropdown menu={{ items: menuItems(item) }} trigger={['click']} placement="bottomRight">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      icon={<FiMoreVertical />}
+                      aria-label="Hành động"
+                      loading={deletingId === item.id}
+                      className="record-item-edit"
+                    />
+                  </Dropdown>
                 </div>
-                <Dropdown menu={{ items: menuItems(item) }} trigger={['click']} placement="bottomRight">
-                  <Button
-                    type="text"
-                    shape="circle"
-                    icon={<FiMoreVertical />}
-                    aria-label="Hành động"
-                    loading={deletingId === item.id}
-                    className="record-item-edit"
-                  />
-                </Dropdown>
-              </div>
-            </List.Item>
-          )}
-        />
+              </List.Item>
+            )}
+          />
         </div>
       </Card>
 
@@ -233,7 +233,16 @@ export default function IncomePage() {
               </Select>
             </Form.Item>
           )}
-          <Form.Item name="amount" label="Số tiền" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}><Input type="number" min="1000" /></Form.Item>
+          <Form.Item name="amount" label="Số tiền" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}>
+            <InputNumber
+              style={{ width: '100%' }}
+              min={1000}
+              step={10000}
+              placeholder="100.000"
+              formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '')}
+              parser={(value) => (value ? value.replace(/\./g, '').replace(/vnđ/gi, '').trim() : '')}
+            />
+          </Form.Item>
           <Form.Item name="date" label="Ngày"><DatePicker style={{ width: '100%' }} /></Form.Item>
           <Form.Item name="note" label="Ghi chú"><Input.TextArea rows={3} /></Form.Item>
           <Button type="primary" icon={<FiTrendingUp />} htmlType="submit" loading={submitting} block>

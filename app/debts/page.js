@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Card, Form, Input, Select, AutoComplete, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown } from 'antd';
+import { Card, Form, Input, Select, AutoComplete, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown, InputNumber } from 'antd';
 import { FiBriefcase, FiEdit2, FiMoreVertical, FiPlus, FiTrash2 } from 'react-icons/fi';
 import dayjs from 'dayjs';
 import { useFinance } from '../components/FinanceProvider';
@@ -157,41 +157,41 @@ export default function DebtsPage() {
           </Select>
         </div>
         <div className="scroll-list">
-        <List
-          dataSource={filteredDebts}
-          renderItem={(item) => (
-            <List.Item>
-              <div className="record-item">
-                <div className="record-item-body">
-                  <div className="record-item-header">
-                    <Text strong className="record-item-title">{item.person}</Text>
-                    <Text
-                      strong
-                      className="record-item-amount"
-                      style={{ color: item.amount < 0 ? '#16a34a' : undefined }}
-                    >
-                      {formatCurrency(item.amount)}
-                    </Text>
+          <List
+            dataSource={filteredDebts}
+            renderItem={(item) => (
+              <List.Item>
+                <div className="record-item">
+                  <div className="record-item-body">
+                    <div className="record-item-header">
+                      <Text strong className="record-item-title">{item.person}</Text>
+                      <Text
+                        strong
+                        className="record-item-amount"
+                        style={{ color: item.amount < 0 ? '#16a34a' : undefined }}
+                      >
+                        {formatCurrency(item.amount)}
+                      </Text>
+                    </div>
+                    <div className="record-item-footer">
+                      <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
+                      <span className="record-item-date">{item.date}</span>
+                    </div>
                   </div>
-                  <div className="record-item-footer">
-                    <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
-                    <span className="record-item-date">{item.date}</span>
-                  </div>
+                  <Dropdown menu={{ items: menuItems(item) }} trigger={['click']} placement="bottomRight">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      icon={<FiMoreVertical />}
+                      aria-label="Hành động"
+                      loading={deletingId === item.id}
+                      className="record-item-edit"
+                    />
+                  </Dropdown>
                 </div>
-                <Dropdown menu={{ items: menuItems(item) }} trigger={['click']} placement="bottomRight">
-                  <Button
-                    type="text"
-                    shape="circle"
-                    icon={<FiMoreVertical />}
-                    aria-label="Hành động"
-                    loading={deletingId === item.id}
-                    className="record-item-edit"
-                  />
-                </Dropdown>
-              </div>
-            </List.Item>
-          )}
-        />
+              </List.Item>
+            )}
+          />
         </div>
         <div className="list-summary">
           <Text strong>{filterPerson ? `Tổng nợ của ${filterPerson}` : 'Tổng cộng'}</Text>
@@ -210,7 +210,16 @@ export default function DebtsPage() {
               placeholder="Chọn hoặc nhập tên người vay"
             />
           </Form.Item>
-          <Form.Item name="amount" label="Số tiền" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}><Input type="number" min="1000" /></Form.Item>
+          <Form.Item name="amount" label="Số tiền" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}>
+            <InputNumber
+              style={{ width: '100%' }}
+              min={1000}
+              step={10000}
+              placeholder="100.000"
+              formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '')}
+              parser={(value) => (value ? value.replace(/\./g, '').replace(/vnđ/gi, '').trim() : '')}
+            />
+          </Form.Item>
           <Form.Item name="date" label="Ngày" rules={[{ required: true, message: 'Vui lòng chọn ngày' }]} initialValue={dayjs()}>
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>

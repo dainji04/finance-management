@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, Form, Input, Button, Typography, List, Tag, message, Spin, Alert, Modal, Dropdown } from 'antd';
+import { Card, Form, Input, Button, Typography, List, Tag, message, Spin, Alert, Modal, Dropdown, InputNumber } from 'antd';
 import { FiEdit2, FiGrid, FiMoreVertical, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useFinance } from '../components/FinanceProvider';
 
@@ -114,34 +114,34 @@ export default function CategoriesPage() {
         extra={<Button type="primary" icon={<FiPlus />} onClick={openCreateModal}>Thêm mới</Button>}
       >
         <div className="scroll-list">
-        <List
-          dataSource={data.categories}
-          renderItem={(category) => (
-            <List.Item>
-              <div className="record-item">
-                <div className="record-item-body">
-                  <div className="record-item-header">
-                    <span className="record-item-title"><Tag color={category.color} variant="solid" style={{ color: '#fff' }}>{category.name}</Tag></span>
-                    <Text strong className="record-item-amount">{formatCurrency(category.budget)}</Text>
+          <List
+            dataSource={data.categories}
+            renderItem={(category) => (
+              <List.Item>
+                <div className="record-item">
+                  <div className="record-item-body">
+                    <div className="record-item-header">
+                      <span className="record-item-title"><Tag color={category.color} variant="solid" style={{ color: '#fff' }}>{category.name}</Tag></span>
+                      <Text strong className="record-item-amount">{formatCurrency(category.budget)}</Text>
+                    </div>
+                    <div className="record-item-footer">
+                      <span className="muted">Ngân sách hàng tháng</span>
+                    </div>
                   </div>
-                  <div className="record-item-footer">
-                    <span className="muted">Ngân sách hàng tháng</span>
-                  </div>
+                  <Dropdown menu={{ items: menuItems(category) }} trigger={['click']} placement="bottomRight">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      icon={<FiMoreVertical />}
+                      aria-label="Hành động"
+                      loading={deletingId === category.id}
+                      className="record-item-edit"
+                    />
+                  </Dropdown>
                 </div>
-                <Dropdown menu={{ items: menuItems(category) }} trigger={['click']} placement="bottomRight">
-                  <Button
-                    type="text"
-                    shape="circle"
-                    icon={<FiMoreVertical />}
-                    aria-label="Hành động"
-                    loading={deletingId === category.id}
-                    className="record-item-edit"
-                  />
-                </Dropdown>
-              </div>
-            </List.Item>
-          )}
-        />
+              </List.Item>
+            )}
+          />
         </div>
       </Card>
 
@@ -149,7 +149,16 @@ export default function CategoriesPage() {
         <Form form={form} layout="vertical" onFinish={submit} onFinishFailed={onFinishFailed}>
           <Form.Item name="name" label="Tên danh mục" rules={[{ required: true, message: 'Vui lòng nhập tên danh mục' }]}><Input /></Form.Item>
           <Form.Item name="color" label="Màu hiển thị"><Input type="color" style={{ height: 40, padding: 4 }} /></Form.Item>
-          <Form.Item name="budget" label="Ngân sách"><Input type="number" /></Form.Item>
+          <Form.Item name="budget" label="Ngân sách">
+            <InputNumber
+              style={{ width: '100%' }}
+              min={0}
+              step={10000}
+              placeholder="100.000"
+              formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '')}
+              parser={(value) => (value ? value.replace(/\./g, '').replace(/vnđ/gi, '').trim() : '')}
+            />
+          </Form.Item>
           <Button type="primary" icon={<FiGrid />} htmlType="submit" loading={submitting} block>
             {editingId ? 'Cập nhật' : 'Thêm danh mục'}
           </Button>

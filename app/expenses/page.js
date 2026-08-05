@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Card, Form, Input, Select, DatePicker, Button, Typography, List, Tag, message, Spin, Alert, Modal, Dropdown } from 'antd';
+import { Card, Form, Input, Select, DatePicker, Button, Typography, List, Tag, message, Spin, Alert, Modal, Dropdown, InputNumber } from 'antd';
 import { FiDollarSign, FiEdit2, FiMoreVertical, FiPlus, FiTrash2 } from 'react-icons/fi';
 import dayjs from 'dayjs';
 import { useFinance } from '../components/FinanceProvider';
@@ -163,44 +163,44 @@ export default function ExpensesPage() {
           />
         </div>
         <div className="scroll-list">
-        <List
-          dataSource={filteredExpenses}
-          renderItem={(item) => {
-            const category = data.categories.find((entry) => entry.id === item.categoryId);
-            return (
-              <List.Item>
-                <div className="record-item">
-                  <div className="record-item-body">
-                    <div className="record-item-header">
-                      <span className="record-item-title">
-                        {category ? (
-                          <Tag color={category.color} variant="solid" style={{ color: '#fff' }}>{category.name}</Tag>
-                        ) : (
-                          <Tag>Không xác định</Tag>
-                        )}
-                      </span>
-                      <Text strong className="record-item-amount">{formatCurrency(item.amount)}</Text>
+          <List
+            dataSource={filteredExpenses}
+            renderItem={(item) => {
+              const category = data.categories.find((entry) => entry.id === item.categoryId);
+              return (
+                <List.Item>
+                  <div className="record-item">
+                    <div className="record-item-body">
+                      <div className="record-item-header">
+                        <span className="record-item-title">
+                          {category ? (
+                            <Tag color={category.color} variant="solid" style={{ color: '#fff' }}>{category.name}</Tag>
+                          ) : (
+                            <Tag>Không xác định</Tag>
+                          )}
+                        </span>
+                        <Text strong className="record-item-amount">{formatCurrency(item.amount)}</Text>
+                      </div>
+                      <div className="record-item-footer">
+                        <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
+                        <span className="record-item-date">{item.date}</span>
+                      </div>
                     </div>
-                    <div className="record-item-footer">
-                      <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
-                      <span className="record-item-date">{item.date}</span>
-                    </div>
+                    <Dropdown menu={{ items: menuItems(item) }} trigger={['click']} placement="bottomRight">
+                      <Button
+                        type="text"
+                        shape="circle"
+                        icon={<FiMoreVertical />}
+                        aria-label="Hành động"
+                        loading={deletingId === item.id}
+                        className="record-item-edit"
+                      />
+                    </Dropdown>
                   </div>
-                  <Dropdown menu={{ items: menuItems(item) }} trigger={['click']} placement="bottomRight">
-                    <Button
-                      type="text"
-                      shape="circle"
-                      icon={<FiMoreVertical />}
-                      aria-label="Hành động"
-                      loading={deletingId === item.id}
-                      className="record-item-edit"
-                    />
-                  </Dropdown>
-                </div>
-              </List.Item>
-            );
-          }}
-        />
+                </List.Item>
+              );
+            }}
+          />
         </div>
         <div className="list-summary">
           <Text strong>Tổng cộng</Text>
@@ -215,7 +215,14 @@ export default function ExpensesPage() {
             <Select>{data.categories.map((category) => <Option key={category.id} value={category.id}>{category.name}</Option>)}</Select>
           </Form.Item>
           <Form.Item name="amount" label="Số tiền" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}>
-            <Input type="number" min="1000" />
+            <InputNumber
+              style={{ width: '100%' }}
+              min={1000}
+              step={10000}
+              placeholder="100.000"
+              formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '')}
+              parser={(value) => (value ? value.replace(/\./g, '').replace(/vnđ/gi, '').trim() : '')}
+            />
           </Form.Item>
           <Form.Item name="note" label="Ghi chú"><Input.TextArea rows={3} /></Form.Item>
           <Button type="primary" icon={<FiDollarSign />} htmlType="submit" loading={submitting} block>
