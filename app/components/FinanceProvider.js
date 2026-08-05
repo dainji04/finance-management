@@ -1,8 +1,11 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const FinanceContext = createContext(null);
+
+const PUBLIC_PAGES = ['/login', '/register'];
 
 const defaultProfile = { displayName: 'Bạn', name: '', email: '', phone: '', balance: 0 };
 
@@ -19,14 +22,25 @@ function normalizeList(list = []) {
 }
 
 export function FinanceProvider({ children }) {
+  const pathname = usePathname();
+  const isPublicPage = PUBLIC_PAGES.includes(pathname);
   const [data, setData] = useState({ categories: [], expenses: [], incomes: [], debts: [], activities: [], profile: defaultProfile });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isPublicPage);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (isPublicPage) {
+      setLoading(false);
+      return;
+    }
+
     async function fetchData() {
       try {
         const response = await fetch('/api/data');
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
         if (!response.ok) throw new Error('Failed to load data');
         const body = await response.json();
         setData({
@@ -45,7 +59,7 @@ export function FinanceProvider({ children }) {
       }
     }
     fetchData();
-  }, []);
+  }, [isPublicPage]);
 
   const api = useMemo(() => ({
     data,

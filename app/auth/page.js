@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, Form, Input, Button, Typography, message, Spin, Alert } from 'antd';
-import { FiUser } from 'react-icons/fi';
+import { FiLogOut, FiUser } from 'react-icons/fi';
 import { useFinance } from '../components/FinanceProvider';
 
 const { Title } = Typography;
@@ -10,6 +10,7 @@ const { Title } = Typography;
 export default function AuthPage() {
   const { data, updateProfile, loading, error } = useFinance();
   const [form, setForm] = useState(data.profile);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     setForm(data.profile);
@@ -22,6 +23,15 @@ export default function AuthPage() {
       message.success('Đã lưu hồ sơ');
     } catch (err) {
       message.error('Không lưu được hồ sơ');
+    }
+  };
+
+  const logout = async () => {
+    setLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/login';
     }
   };
 
@@ -59,8 +69,8 @@ export default function AuthPage() {
             <Input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
           </div>
           <div className="field full">
-            <label>Email</label>
-            <Input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+            <label>Email (tài khoản đăng nhập)</label>
+            <Input type="email" value={form.email} disabled />
           </div>
           <div className="field full">
             <label>Số điện thoại</label>
@@ -76,6 +86,12 @@ export default function AuthPage() {
           </div>
           <Button type="primary" icon={<FiUser />} htmlType="submit">Lưu hồ sơ</Button>
         </form>
+      </Card>
+
+      <Card>
+        <Button danger icon={<FiLogOut />} onClick={logout} loading={loggingOut} block>
+          Đăng xuất
+        </Button>
       </Card>
     </section>
   );

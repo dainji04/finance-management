@@ -189,7 +189,7 @@ export default function ActivitiesPage() {
                     <Text strong className="record-item-amount">{sessionLabel(item.session)}</Text>
                   </div>
                   <div className="record-item-footer">
-                    <span className="muted record-item-note">{item.note || 'Không có ghi chú'}</span>
+                    <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
                     <span className="record-item-date">{item.date}</span>
                   </div>
                 </div>

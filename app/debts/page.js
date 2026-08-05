@@ -1,12 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Card, Form, Input, AutoComplete, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown } from 'antd';
+import { Card, Form, Input, Select, AutoComplete, DatePicker, Button, List, Typography, message, Spin, Alert, Modal, Dropdown } from 'antd';
 import { FiBriefcase, FiEdit2, FiMoreVertical, FiPlus, FiTrash2 } from 'react-icons/fi';
 import dayjs from 'dayjs';
 import { useFinance } from '../components/FinanceProvider';
 
 const { Text } = Typography;
+const { Option } = Select;
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
@@ -19,15 +20,25 @@ export default function DebtsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [filterPerson, setFilterPerson] = useState(undefined);
 
   const sortedDebts = useMemo(() => {
     return [...data.debts].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }, [data.debts]);
 
-  const personOptions = useMemo(() => {
-    const names = Array.from(new Set(data.debts.map((item) => item.person).filter(Boolean)));
-    return names.map((name) => ({ value: name }));
+  const uniquePersons = useMemo(() => {
+    return Array.from(new Set(data.debts.map((item) => item.person).filter(Boolean)));
   }, [data.debts]);
+
+  const personOptions = useMemo(() => uniquePersons.map((name) => ({ value: name })), [uniquePersons]);
+
+  const filteredDebts = useMemo(() => {
+    return sortedDebts.filter((item) => !filterPerson || item.person === filterPerson);
+  }, [sortedDebts, filterPerson]);
+
+  const filteredTotal = useMemo(() => {
+    return filteredDebts.reduce((sum, item) => sum + item.amount, 0);
+  }, [filteredDebts]);
 
   const openCreateModal = () => {
     setEditingId(null);
@@ -134,9 +145,20 @@ export default function DebtsPage() {
         title="Danh sách công nợ"
         extra={<Button type="primary" icon={<FiPlus />} onClick={openCreateModal}>Thêm mới</Button>}
       >
+        <div className="filter-row">
+          <Select
+            allowClear
+            placeholder="Tất cả người vay"
+            className="filter-field"
+            value={filterPerson}
+            onChange={setFilterPerson}
+          >
+            {uniquePersons.map((name) => <Option key={name} value={name}>{name}</Option>)}
+          </Select>
+        </div>
         <div className="scroll-list">
         <List
-          dataSource={sortedDebts}
+          dataSource={filteredDebts}
           renderItem={(item) => (
             <List.Item>
               <div className="record-item">
@@ -152,7 +174,7 @@ export default function DebtsPage() {
                     </Text>
                   </div>
                   <div className="record-item-footer">
-                    <span className="muted record-item-note">{item.note || 'Không có ghi chú'}</span>
+                    <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
                     <span className="record-item-date">{item.date}</span>
                   </div>
                 </div>
@@ -170,6 +192,12 @@ export default function DebtsPage() {
             </List.Item>
           )}
         />
+        </div>
+        <div className="list-summary">
+          <Text strong>{filterPerson ? `Tổng nợ của ${filterPerson}` : 'Tổng cộng'}</Text>
+          <Text strong style={{ color: filteredTotal < 0 ? '#16a34a' : undefined }}>
+            {formatCurrency(filteredTotal)}
+          </Text>
         </div>
       </Card>
 

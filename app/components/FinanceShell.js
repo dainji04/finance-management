@@ -13,6 +13,8 @@ function formatCurrency(value) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
 }
 
+const PUBLIC_PAGES = ['/login', '/register'];
+
 const links = [
   { href: '/', label: 'Tổng hợp', icon: <FiBarChart2 /> },
   { href: '/expenses', label: 'Chi tiêu', icon: <FiDollarSign /> },
@@ -54,6 +56,10 @@ export function FinanceShell({ children }) {
 
     return () => mediaQuery.removeEventListener('change', updateLayout);
   }, []);
+
+  if (PUBLIC_PAGES.includes(pathname)) {
+    return children;
+  }
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f4f7fb' }}>

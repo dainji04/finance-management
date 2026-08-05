@@ -34,6 +34,10 @@ export default function ExpensesPage() {
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }, [data.expenses, filterCategoryId, filterMonth]);
 
+  const filteredTotal = useMemo(() => {
+    return filteredExpenses.reduce((sum, item) => sum + item.amount, 0);
+  }, [filteredExpenses]);
+
   const openCreateModal = () => {
     setEditingId(null);
     form.resetFields();
@@ -178,7 +182,7 @@ export default function ExpensesPage() {
                       <Text strong className="record-item-amount">{formatCurrency(item.amount)}</Text>
                     </div>
                     <div className="record-item-footer">
-                      <span className="muted record-item-note">{item.note || 'Không có ghi chú'}</span>
+                      <span className="muted record-item-note" title={item.note || ''}>{item.note || 'Không có ghi chú'}</span>
                       <span className="record-item-date">{item.date}</span>
                     </div>
                   </div>
@@ -197,6 +201,10 @@ export default function ExpensesPage() {
             );
           }}
         />
+        </div>
+        <div className="list-summary">
+          <Text strong>Tổng cộng</Text>
+          <Text strong>{formatCurrency(filteredTotal)}</Text>
         </div>
       </Card>
 
