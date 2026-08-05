@@ -62,8 +62,8 @@ export function FinanceShell({ children }) {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f4f7fb' }}>
-      <Header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '0 16px' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <Header style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--border)', padding: '0 16px' }}>
         <div className="topbar">
           <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 18, fontWeight: 600, minHeight: 24 }}>
             {currentLink?.icon}
@@ -72,7 +72,7 @@ export function FinanceShell({ children }) {
           {pathname === '/' && (
             <div className="header-balance">
               <span className="header-balance-label">Số dư</span>
-              <span className="header-balance-value" style={{ color: currentBalance < 0 ? '#cf1322' : '#2563eb' }}>
+              <span className="header-balance-value" style={{ color: currentBalance < 0 ? '#ff4d4f' : 'var(--primary)' }}>
                 {formatCurrency(currentBalance)}
               </span>
             </div>
